@@ -1,39 +1,51 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advanced To-Do List</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <title>To Do List</title>
+    <link rel="icon" type="image/png" href="img/To Do List.png" />
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <div class="container">
-      <header>
-        <h1><i class="fas fa-check-double"></i> Task Master</h1>
-        <p>Organize your day with deadlines</p>
-      </header>
+    <div class="todo-container">
+      <h1>To Do List</h1>
 
-      <section class="form-section">
-        <input type="text" id="task-input" placeholder="Add your task..." />
-        <input type="date" id="date-input" />
-        <button id="add-task-btn"><i class="fas fa-plus"></i> Add</button>
-      </section>
+      <div class="input-group">
+        <input type="text" id="todo-input" placeholder="Tambah tugas..." />
+        <input type="date" id="todo-date" />
+        <button id="add-btn" title="Tambah tugas">+</button>
+      </div>
 
-      <section class="filter-section">
-        <label for="filter">Filter:</label>
-        <select id="filter">
-          <option value="all">All Tasks</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-          <option value="today">Today</option>
-          <option value="by-date">By Date</option>
-        </select>
-        <input type="date" id="filter-date" style="display: none" />
-      </section>
+      <div class="action-group">
+        <div class="filter-dropdown">
+          <button id="filter-toggle">Filter ⌄</button>
+          <div class="filter-menu" id="filter-menu">
+            <div data-filter="all">Semua Tugas</div>
+            <div data-filter="pending">Belum Selesai</div>
+            <div data-filter="completed">Selesai</div>
+          </div>
+        </div>
+        <button id="delete-all-btn" class="delete-btn">Hapus Semua</button>
+      </div>
 
-      <ul id="task-list"></ul>
+      <table>
+        <thead>
+          <tr>
+            <th>Tugas</th>
+            <th>Batas Waktu</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="todo-body">
+          <tr>
+            <td colspan="4" class="empty">Belum ada tugas</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <script src="script.js"></script>
+
+    <script src="js/script.js"></script>
   </body>
 </html>

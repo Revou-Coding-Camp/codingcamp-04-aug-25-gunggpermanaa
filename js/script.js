@@ -1,112 +1,120 @@
-const taskInput = document.getElementById("task-input");
-const dateInput = document.getElementById("date-input");
-const addTaskBtn = document.getElementById("add-task-btn");
-const taskList = document.getElementById("task-list");
-const filter = document.getElementById("filter");
-const filterDate = document.getElementById("filter-date");
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("todo-input");
+  const date = document.getElementById("todo-date");
+  const addBtn = document.getElementById("add-btn");
+  const deleteAllBtn = document.getElementById("delete-all-btn");
+  const filterBtn = document.getElementById("filter-btn"); // Opsional, jika digunakan
+  const todoBody = document.getElementById("todo-body");
+  const filterToggle = document.getElementById("filter-toggle");
+  const filterMenu = document.getElementById("filter-menu");
 
-let tasks = [];
+  let todos = [];
 
-addTaskBtn.addEventListener("click", addTask);
-taskInput.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") addTask();
+  // Tampilkan/sembunyikan menu dropdown filter
+  filterToggle.addEventListener("click", () => {
+    filterMenu.style.display = filterMenu.style.display === "block" ? "none" : "block";
+  });
+
+  // Event untuk setiap item filter di menu dropdown
+  filterMenu.querySelectorAll("div").forEach((item) => {
+    item.addEventListener("click", () => {
+      const filter = item.getAttribute("data-filter");
+      terapkanFilter(filter);
+      filterMenu.style.display = "none";
+    });
+  });
+
+  // Filter manual berdasarkan kata kunci (jika tombol digunakan)
+  if (filterBtn) {
+    filterBtn.addEventListener("click", () => {
+      const keyword = prompt("Filter berdasarkan kata:");
+      if (!keyword) return;
+      const hasilFilter = todos.filter((todo) => todo.text.toLowerCase().includes(keyword.toLowerCase()));
+      tampilkanTodos(hasilFilter);
+    });
+  }
+
+  // Tambahkan tugas baru
+  addBtn.addEventListener("click", () => {
+    const teks = input.value.trim();
+    const tanggal = date.value;
+
+    if (!teks || !tanggal) return;
+
+    todos.push({ text: teks, dueDate: tanggal, completed: false });
+    input.value = "";
+    date.value = "";
+    tampilkanTodos(todos);
+  });
+
+  // Hapus semua tugas
+  deleteAllBtn.addEventListener("click", () => {
+    todos = [];
+    tampilkanTodos(todos);
+  });
+
+  // Tampilkan daftar tugas ke dalam tabel
+  function tampilkanTodos(data) {
+    todoBody.innerHTML = "";
+
+    if (data.length === 0) {
+      todoBody.innerHTML = `<tr><td colspan="4" class="empty">Tidak ada tugas ditemukan</td></tr>`;
+      return;
+    }
+
+    data.forEach((todo, index) => {
+      const row = document.createElement("tr");
+
+      const taskCell = document.createElement("td");
+      taskCell.textContent = todo.text;
+
+      const dateCell = document.createElement("td");
+      dateCell.textContent = todo.dueDate;
+
+      const statusCell = document.createElement("td");
+      statusCell.textContent = todo.completed ? "Selesai" : "Belum Selesai";
+      statusCell.className = todo.completed ? "status-done" : "status-pending";
+
+      const actionsCell = document.createElement("td");
+
+      const completeBtn = document.createElement("button");
+      completeBtn.textContent = "✔";
+      completeBtn.className = "complete-btn";
+      completeBtn.onclick = () => {
+        todos[index].completed = !todos[index].completed;
+        tampilkanTodos(todos);
+      };
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "🗑";
+      deleteBtn.className = "delete-btn";
+      deleteBtn.onclick = () => {
+        todos.splice(index, 1);
+        tampilkanTodos(todos);
+      };
+
+      actionsCell.appendChild(completeBtn);
+      actionsCell.appendChild(deleteBtn);
+
+      row.append(taskCell, dateCell, statusCell, actionsCell);
+      todoBody.appendChild(row);
+    });
+  }
+
+  // Terapkan filter dari menu dropdown
+  function terapkanFilter(filter) {
+    let hasilFilter = [];
+
+    if (filter === "all") {
+      hasilFilter = todos;
+    } else if (filter === "pending") {
+      hasilFilter = todos.filter((todo) => !todo.completed);
+    } else if (filter === "completed") {
+      hasilFilter = todos.filter((todo) => todo.completed);
+    }
+
+    tampilkanTodos(hasilFilter);
+  }
+
+  tampilkanTodos(todos);
 });
-
-filter.addEventListener("change", handleFilterChange);
-filterDate.addEventListener("change", renderTasks);
-
-function addTask() {
-  const text = taskInput.value.trim();
-  const date = dateInput.value;
-
-  if (!text || !date) {
-    alert("Please enter task and date!");
-    return;
-  }
-
-  tasks.push({
-    text,
-    date,
-    completed: false,
-  });
-
-  taskInput.value = "";
-  dateInput.value = "";
-  renderTasks();
-}
-
-function renderTasks() {
-  taskList.innerHTML = "";
-  const filtered = getFilteredTasks();
-
-  filtered.forEach((task, index) => {
-    const li = document.createElement("li");
-    li.className = "task-item";
-    if (task.completed) li.classList.add("completed");
-
-    const infoDiv = document.createElement("div");
-    infoDiv.className = "task-info";
-
-    const textSpan = document.createElement("div");
-    textSpan.className = "task-text";
-    textSpan.textContent = task.text;
-
-    const dateSpan = document.createElement("div");
-    dateSpan.className = "task-date";
-    dateSpan.textContent = `Due: ${task.date}`;
-
-    infoDiv.appendChild(textSpan);
-    infoDiv.appendChild(dateSpan);
-
-    const btnDiv = document.createElement("div");
-    btnDiv.className = "task-buttons";
-
-    const completeBtn = document.createElement("button");
-    completeBtn.innerHTML = '<i class="fas fa-check"></i>';
-    completeBtn.onclick = () => {
-      task.completed = !task.completed;
-      renderTasks();
-    };
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-    deleteBtn.onclick = () => {
-      tasks.splice(index, 1);
-      renderTasks();
-    };
-
-    btnDiv.appendChild(completeBtn);
-    btnDiv.appendChild(deleteBtn);
-
-    li.appendChild(infoDiv);
-    li.appendChild(btnDiv);
-
-    taskList.appendChild(li);
-  });
-}
-
-function handleFilterChange() {
-  if (filter.value === "by-date") {
-    filterDate.style.display = "block";
-  } else {
-    filterDate.style.display = "none";
-    renderTasks();
-  }
-}
-
-function getFilteredTasks() {
-  const today = new Date().toISOString().slice(0, 10);
-
-  switch (filter.value) {
-    case "completed":
-      return tasks.filter((t) => t.completed);
-    case "pending":
-      return tasks.filter((t) => !t.completed);
-    case "today":
-      return tasks.filter((t) => t.date === today);
-    case "by-date":
-      return tasks.filter((t) => t.date === filterDate.value);
-    default:
-      return tasks;
-  }
-}
